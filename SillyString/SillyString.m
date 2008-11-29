@@ -56,18 +56,28 @@ static NSUInteger ColonCount(SEL selector)
 static NSString *SillyStringImplementation(id self, SEL _cmd, ...)
 {
 	NSUInteger i, count = ColonCount(_cmd);
-	NSMutableString *result = [[self mutableCopy] autorelease];
+	NSMutableString *string = [self mutableCopy];
+	NSString *result = nil;
 	
-	va_list args;
-	id obj = nil;
-	va_start(args, _cmd);
-	for (i = 0; i != count; ++i)
+	@try
 	{
-		obj = va_arg(args, id);
-		if (obj == nil)  obj = @"";
-		[result appendString:[obj description]];
+		va_list args;
+		id obj = nil;
+		va_start(args, _cmd);
+		for (i = 0; i != count; ++i)
+		{
+			obj = va_arg(args, id);
+			if (obj == nil)  obj = @"";
+			[string appendString:[obj description]];
+		}
+		va_end(args);
+		
+		result = [[string copy] autorelease];
 	}
-	va_end(args);
+	@finally
+	{
+		[string release];
+	}
 	
 	return result;
 }
