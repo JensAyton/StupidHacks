@@ -6,11 +6,17 @@
 static NSNumber *GetNumber(void);
 
 
-int main (int argc, const char * argv[]) {
+int main (int argc, const char * argv[])
+{
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	
 	NSNumber *n = GetNumber();
-    NSLog(@"Hello, World! %@", n);
+	
+	// Verify that toll-free bridging works
+	long value;
+	CFNumberGetValue((CFNumberRef)n, kCFNumberLongType, &value);
+	
+    NSLog(@"Hello, World! %@ = %li (%@)", n, value, [n class]);
 	
     [pool drain];
     return 0;
