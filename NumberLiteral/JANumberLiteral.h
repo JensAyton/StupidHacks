@@ -16,37 +16,26 @@
 	integer types separately and the fallback for non-constants, it boils down
 	to:
 	
-	struct JAFloatLiteralDefs { const int *isa; double value; };
-	static NSNumber *number = (NSNumber *)&((struct JAFloatLiteralDefs){JAFloatLiteralClassObject, 42.0});
+	struct JAFloatLiteralDefs { Class isa; double value; };
+	static const JAFloatLiteralDefs object = { JAFloatLiteralClassObject, 42.0 };
+	return (NSNumber *)&object;
 	
 	The "static" here is critical; without it, the object would be built on
 	the stack and be invalidated when your function or method returned. The
 	JANUMBERLITERAL_CONSTANT() hides this for you by creating the static
 	variable in an inner scope and returning a pointer to it.
-	
-	The initializer for a static variable must be a constant expression. The
-	isa field is made a constant expression by using a quirk of the C++ type
-	system (there are so many...) which was inspired by a weird gcc error
-	message and some digging around in clang source. The value field is a
-	constant expression if the parameter to the macro is. The top level macro,
-	$N(), will recognize non-constant expressions and create autoreleased
-	NSNumbers for them instead of using JANUMBERLITERAL_CONSTANT().
-	
-	(Note: there is a long-standing "bug" in gcc which causes it to think all
-	expressions that are known constants at compile time are constant
-	expressions. This isn't strictly true, but has no negative effects; it
-	just means that things like $N(x-x) generate constants even though the C
-	specification doesn't classify x-x as a constant expression.)
 */
 
 #import <Foundation/Foundation.h>
 
 
-/*	Determine whether a number is a float or an int by natevw. NOTE: this
-	evaluates its argument multiple times and is thus side-effect free.
-	This is OK as long as it's only used on known constant expressions, as is
-	the case in this header.
+/*	JANUMBERLITERAL_IS_FLOAT_TYPE() is true for floating-point types, false
+	for other types, and undefined for non-numerical types. NOTE: the C++
+	impelementation (by natevw) evaluates its argument multiple times and is
+	thus not side-effect free. This is OK as it's only used on known constant
+	expressions.
 */
+#ifdef __cplusplus
 #define JANUMBERLITERAL_IS_FLOAT_TYPE(x)	( \
 												((x) > 0) ? \
 													((x) / ((x) + 1)) \
@@ -57,6 +46,12 @@
 														(((x) + 1) / ((x) + 2)) \
 													) \
 											)
+#else
+#define JANUMBERLITERAL_IS_FLOAT_TYPE(n)	(__builtin_types_compatible_p(__typeof__(n), float) || \
+											__builtin_types_compatible_p(__typeof__(n), double) || \
+											__builtin_types_compatible_p(__typeof__(n), long double))
+#endif
+
 
 
 /*	JANUMBERLITERAL_DYNAMIC() is a non-evil macro to create an autoreleased
@@ -83,17 +78,7 @@ inline NSNumber *JANumberLiteralMakeNSNumber(unsigned long long n)  { return [NS
 
 #define JANUMBERLITERAL_DYNAMIC(n)			JANumberLiteralMakeNSNumber(n)
 #else
-
-/*	JANUMBERLITERAL_IS_FLOAT_TYPE_2() tells us whether an expression has
-	floating-point type without evaluating it and is always constant-foldable.
-	Unfortunately it's not available in C++, becuase hey, we've got the
-	convenience of overloading (see above).
-*/
-#define JANUMBERLITERAL_IS_FLOAT_TYPE_2(n)	(__builtin_types_compatible_p(__typeof__(n), float) || \
-											__builtin_types_compatible_p(__typeof__(n), double) || \
-											__builtin_types_compatible_p(__typeof__(n), long double))
-
-#define JANUMBERLITERAL_DYNAMIC(n)			(JANUMBERLITERAL_IS_FLOAT_TYPE_2(n) ? \
+#define JANUMBERLITERAL_DYNAMIC(n)			(JANUMBERLITERAL_IS_FLOAT_TYPE(n) ? \
 												[NSNumber numberWithDouble:n] \
 											:\
 												[NSNumber numberWithLongLong:n] \
@@ -102,9 +87,9 @@ inline NSNumber *JANumberLiteralMakeNSNumber(unsigned long long n)  { return [NS
 #endif
 
 /*	Apart from the other ways it's evil, this only works in the old fragile
-	runtime, and only in Objective-C++.
+	runtime.
 */
-#if !defined(__OBJC2__) && defined(__cplusplus)
+#if !defined(__OBJC2__)
 
 
 /*	Get us some pointers to the class objects we need. These are declared as
@@ -117,30 +102,29 @@ inline NSNumber *JANumberLiteralMakeNSNumber(unsigned long long n)  { return [NS
 	get around this using the gcc asm label extension - that's section 5.37
 	in the gcc 4.2 manual. Thanks to <sys/cdefs.h> for showing me the way.
  */
-extern int JAFloatLiteralClassObject[]		__asm__(".objc_class_name_JAFloatNumber");
-extern int JAIntegerLiteralClassObject[]	__asm__(".objc_class_name_JAIntegerNumber");
+extern struct objc_class JAFloatLiteralClassObject		__asm__(".objc_class_name_JAFloatNumber");
+extern struct objc_class JAIntegerLiteralClassObject	__asm__(".objc_class_name_JAIntegerNumber");
 
 
-/*	These macros actually create our objects. NOTE: the result of these MUST
-	be assigned to a static pointer. JANUMBERLITERAL_CONSTANT() does this for
-	you.
+/*	These macros actually create our objects. NOTE: using these directly with
+	non-constant expressions will break - the value will be overwritten.
 */
-#define JANUMBERLITERAL_CONSTANT_FLOAT(n)	((NSNumber *)&((struct {const int *isa; double value;}){JAFloatLiteralClassObject, (n)}))
-#define JANUMBERLITERAL_CONSTANT_INT(n)		((NSNumber *)&((struct {const int *isa; long long value;}){JAIntegerLiteralClassObject, (n)}))
+#define JANUMBERLITERAL_CONSTANT_FLOAT(n)	({ static const struct { Class isa; double value; } \
+											object = { &JAFloatLiteralClassObject, (n) }; \
+											(NSNumber *)&object; })
+#define JANUMBERLITERAL_CONSTANT_INT(n)		({ static const struct { Class isa; long long value; } \
+											object = { &JAIntegerLiteralClassObject, (n) }; \
+											(NSNumber *)&object; })
 
 
 /*	JANUMBERLITERAL_CONSTANT() calls  JANUMBERLITERAL_CONSTANT_FLOAT() or
-	JANUMBERLITERAL_CONSTANT_INT(), whichever is appropriate, assigns the
-	result to a static variable so that it doesn't evaporate, and returns
-	the value.
+	JANUMBERLITERAL_CONSTANT_INT(), whichever is appropriate.
 */
-#define JANUMBERLITERAL_CONSTANT(n)			({static NSNumber *result = \
-											(JANUMBERLITERAL_IS_FLOAT_TYPE(n) ? \
+#define JANUMBERLITERAL_CONSTANT(n)			(JANUMBERLITERAL_IS_FLOAT_TYPE(n) ? \
 												JANUMBERLITERAL_CONSTANT_FLOAT(n) \
 											: \
 												JANUMBERLITERAL_CONSTANT_INT(n) \
-											); \
-											result; })	
+											)	
 
 
 /*	Top-level macro $N() calls JANUMBERLITERAL_CONSTANT() for constants and
@@ -154,10 +138,10 @@ extern int JAIntegerLiteralClassObject[]	__asm__(".objc_class_name_JAIntegerNumb
 
 #else
 /*	64-bit or iPhone runtime, or not Obj-C++ - object constant hack won't work.
-	Always use JANUMBERLITERAL_DYNAMIC().
+	Always uses JANUMBERLITERAL_DYNAMIC().
 */
 
-#warning JANumberLiteral only works in Objective-C++ in the old 32-bit runtime, falling back to sensible behaviour.
+#warning JANumberLiteral only works in the old 32-bit runtime, falling back to sensible behaviour.
 
 #define $N(n)	JANUMBERLITERAL_DYNAMIC(n)
 
