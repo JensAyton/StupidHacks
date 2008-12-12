@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1A1E9B6F0EF08851008B48E2 /* JANumberLiteral.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A1E9A400EF07222008B48E2 /* JANumberLiteral.m */; };
-		8DD76F9A0486AA7600D96B5E /* NumberLiteral.mm in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* NumberLiteral.mm */; settings = {ATTRIBUTES = (); }; };
+		1A1E9D9A0EF1F58A008B48E2 /* NumberLiteral.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A1E9D990EF1F58A008B48E2 /* NumberLiteral.m */; };
 		8DD76F9C0486AA7600D96B5E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB779EFE84155DC02AAC07 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -25,10 +25,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		08FB7796FE84155DC02AAC07 /* NumberLiteral.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = NumberLiteral.mm; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		1A1E9A3F0EF07222008B48E2 /* JANumberLiteral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JANumberLiteral.h; sourceTree = "<group>"; };
 		1A1E9A400EF07222008B48E2 /* JANumberLiteral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JANumberLiteral.m; sourceTree = "<group>"; };
+		1A1E9D990EF1F58A008B48E2 /* NumberLiteral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NumberLiteral.m; sourceTree = "<group>"; };
 		32A70AAB03705E1F00C91783 /* NumberLiteral_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NumberLiteral_Prefix.pch; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* NumberLiteral */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NumberLiteral; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -59,7 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				32A70AAB03705E1F00C91783 /* NumberLiteral_Prefix.pch */,
-				08FB7796FE84155DC02AAC07 /* NumberLiteral.mm */,
+				1A1E9D990EF1F58A008B48E2 /* NumberLiteral.m */,
 				1A1E9A3F0EF07222008B48E2 /* JANumberLiteral.h */,
 				1A1E9A400EF07222008B48E2 /* JANumberLiteral.m */,
 			);
@@ -125,8 +125,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8DD76F9A0486AA7600D96B5E /* NumberLiteral.mm in Sources */,
 				1A1E9B6F0EF08851008B48E2 /* JANumberLiteral.m in Sources */,
+				1A1E9D9A0EF1F58A008B48E2 /* NumberLiteral.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
