@@ -92,9 +92,7 @@ inline NSNumber *JANumberLiteralMakeNSNumber(unsigned long long n)  { return [NS
 #if !defined(__OBJC2__)
 
 
-/*	Get us some pointers to the class objects we need. These are declared as
-	arrays because that lets them be constant expressions and external symbols
-	at the same time (but only in C++).
+/*	Get us some pointers to the class objects we need.
 	
 	Normally, an identifier becomes a linker symbol by prefixing it with an
 	underscore. The linker symbols for class objects are prefixed with dots
@@ -102,17 +100,17 @@ inline NSNumber *JANumberLiteralMakeNSNumber(unsigned long long n)  { return [NS
 	get around this using the gcc asm label extension - that's section 5.37
 	in the gcc 4.2 manual. Thanks to <sys/cdefs.h> for showing me the way.
  */
-extern struct objc_class JAFloatLiteralClassObject		__asm__(".objc_class_name_JAFloatNumber");
-extern struct objc_class JAIntegerLiteralClassObject	__asm__(".objc_class_name_JAIntegerNumber");
+extern const struct objc_class JAFloatLiteralClassObject	__asm__(".objc_class_name_JAFloatNumber");
+extern const struct objc_class JAIntegerLiteralClassObject	__asm__(".objc_class_name_JAIntegerNumber");
 
 
 /*	These macros actually create our objects. NOTE: using these directly with
 	non-constant expressions will break - the value will be overwritten.
 */
-#define JANUMBERLITERAL_CONSTANT_FLOAT(n)	({ static const struct { Class isa; double value; } \
+#define JANUMBERLITERAL_CONSTANT_FLOAT(n)	({ static const struct { const struct objc_class *isa; double value; } \
 											object = { &JAFloatLiteralClassObject, (n) }; \
 											(NSNumber *)&object; })
-#define JANUMBERLITERAL_CONSTANT_INT(n)		({ static const struct { Class isa; long long value; } \
+#define JANUMBERLITERAL_CONSTANT_INT(n)		({ static const struct { const struct objc_class *isa; long long value; } \
 											object = { &JAIntegerLiteralClassObject, (n) }; \
 											(NSNumber *)&object; })
 
@@ -137,8 +135,8 @@ extern struct objc_class JAIntegerLiteralClassObject	__asm__(".objc_class_name_J
 				)
 
 #else
-/*	64-bit or iPhone runtime, or not Obj-C++ - object constant hack won't work.
-	Always uses JANUMBERLITERAL_DYNAMIC().
+/*	64-bit or iPhone runtime - object constant hack won't work.
+	Always use JANUMBERLITERAL_DYNAMIC().
 */
 
 #warning JANumberLiteral only works in the old 32-bit runtime, falling back to sensible behaviour.

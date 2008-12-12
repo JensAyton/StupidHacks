@@ -11,13 +11,12 @@ int main (int argc, const char * argv[])
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	
 	NSNumber *n = GetNumber();
-	NSNumber *n2 = GetNumber();
 	
 	// Verify that toll-free bridging works
 	long value;
 	CFNumberGetValue((CFNumberRef)n, kCFNumberLongType, &value);
 	
-    NSLog(@"Hello, World! %@ = %li (%@), %@", n, value, [n class], n2);
+    NSLog(@"Hello, World! %@ = %li (%@)", n, value, [n class]);
 	
     [pool drain];
     return 0;
@@ -26,6 +25,5 @@ int main (int argc, const char * argv[])
 
 static NSNumber *GetNumber(void)
 {
-	NSNumber *n = $N(42.0);
-	return n;
+	return $N(42.0);
 }
