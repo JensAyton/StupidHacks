@@ -27,7 +27,7 @@ static NSString *SillyStringImplementation(id self, SEL _cmd, ...);
 		return class_addMethod([self class], sel, (IMP)SillyStringImplementation, typeStr.UTF8String);
 	}
 	
-	else return [super resolveClassMethod:sel];
+	else return [super resolveInstanceMethod:sel];
 }
 
 @end
