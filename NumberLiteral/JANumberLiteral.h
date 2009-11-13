@@ -11,7 +11,7 @@
 	This code allows you to create "constant" NSNumbers in the data section of
 	your application, in essentially the same way as the @"string" operator
 	does. This is accomplished by packing a struct with the same layout as one
-	of the custom implementations of NSNumber found in JANumberLiteral.h, and
+	of the custom implementations of NSNumber found in JANumberLiteral.m, and
 	casting a pointer to the result. Ignoring the logic to handle float and
 	integer types separately and the fallback for non-constants, it boils down
 	to:
