@@ -1,0 +1,10 @@
+StupidHacks
+
+As the repository name suggests, these things are not good ideas, but they may
+be interesting.
+
+For more information, see these blog posts:
+http://jens.ayton.se/blag/fun-with-the-objc-runtime/
+http://jens.ayton.se/blag/objc-constant-objects/
+
+These hacks are distributed under the renowned "Don't Blame Me" license.
