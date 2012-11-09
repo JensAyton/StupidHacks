@@ -35,7 +35,7 @@
 }
 
 
-- (void) release
+- (oneway void) release
 {
 }
 
@@ -246,7 +246,7 @@
 }
 
 
-- (void) release
+- (oneway void) release
 {
 }
 
@@ -291,7 +291,7 @@
 
 
 // NSNumber methods
-- (long long) doubleValue
+- (double) doubleValue
 {
 	return _value;
 }
@@ -351,7 +351,7 @@
 }
 
 
-- (long) longLongValue
+- (long long) longLongValue
 {
 	return _value;
 }
